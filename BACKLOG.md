@@ -14,6 +14,7 @@
 - [x] Responsive dark theme layout
 - [x] Fallback CORS proxies for reliable data fetching
 - [x] Moved to its own repo + domain (dashboard.marctorrence.com), isolated from the public poker site
+- [x] Fixed "All proxies failed" data-load error — fetch the published sheet directly (it sends `Access-Control-Allow-Origin: *`); proxies demoted to fallback
 
 ### Features (Future)
 _(none planned)_
@@ -23,4 +24,4 @@ _(none known)_
 
 ### Tech Debt
 - Password hardcoded in source — fine for now, but not real auth (subdomain isolation only; page is still publicly reachable)
-- CORS proxy dependency — if all three proxies go down, dashboard breaks
+- CORS proxy fallback is degraded (all three currently 4xx/timeout) — direct fetch is the real path now; if Google ever drops CORS headers, data loading breaks

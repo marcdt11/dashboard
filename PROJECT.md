@@ -35,7 +35,7 @@ domain so it is not discoverable from the public poker tools site.
 
 ### Data Source
 - Published Google Sheet CSV fetched client-side
-- CORS proxy fallback chain (allorigins → corsproxy.io → api.codetabs.com) for reliable cross-origin fetching
+- **Direct fetch first** — the published endpoint sends `Access-Control-Allow-Origin: *`, so the browser fetches it directly. The CORS proxy chain (allorigins → corsproxy.io → api.codetabs.com) is now only a fallback if the direct fetch ever fails.
 - Cache-busting query param appended to each request
 - Fetch kicks off on script load (parallel with the password gate) rather than after submit, so data is ready by the time the user enters the password — `csvPromise` is created at module scope and awaited inside `init()`
 
@@ -56,4 +56,4 @@ domain so it is not discoverable from the public poker tools site.
 
 ## Known Issues
 - **Security**: The subdomain keeps the dashboard off the public poker site, but the page itself is publicly reachable to anyone who knows the URL, and the password is hardcoded in source (not a real security measure). The underlying Google Sheet is published/public.
-- **CORS proxies**: Relies on third-party CORS proxies which may go down; fallback chain mitigates but doesn't eliminate risk.
+- **CORS proxies (fallback only)**: The third-party proxies (allorigins/corsproxy.io/codetabs) are unreliable and have all degraded (408/400/403). They're now only a fallback behind the direct fetch; if Google ever stops sending CORS headers and the proxies are down, data loading breaks.

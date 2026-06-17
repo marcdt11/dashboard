@@ -1073,10 +1073,22 @@
             { url: 'https://api.codetabs.com/v1/proxy?quest=', encode: true }
         ];
 
-        // Fetch with fallback through multiple proxies
+        // Fetch the published Google Sheet CSV. The published endpoint now sends
+        // `Access-Control-Allow-Origin: *`, so we try a direct fetch first and only
+        // fall back to the CORS proxies if that ever stops working.
         async function fetchWithFallback(targetUrl) {
             const urlWithCacheBust = targetUrl + '&_t=' + Date.now();
             const errors = [];
+
+            try {
+                const direct = await fetch(urlWithCacheBust);
+                if (direct.ok) {
+                    return await direct.text();
+                }
+                errors.push(`direct: HTTP ${direct.status}`);
+            } catch (err) {
+                errors.push(`direct: ${err.message}`);
+            }
 
             for (const proxy of CORS_PROXIES) {
                 const proxyUrl = proxy.url + (proxy.encode ? encodeURIComponent(urlWithCacheBust) : urlWithCacheBust);
@@ -1091,7 +1103,7 @@
                 }
             }
 
-            throw new Error('All proxies failed: ' + errors.join('; '));
+            throw new Error('All fetch attempts failed: ' + errors.join('; '));
         }
 
         // Kick off data fetch immediately, in parallel with password entry, so
